@@ -53,7 +53,7 @@ Backup lines:
 2. Every tool is converging on the same ideas (skills, agents, project guidance)
    — but a different filesystem layout. Your knowledge gets trapped in one tool.
 3. anyagent fixes that. One command:
-   `npx anyagent sync --to codex gemini cursor`
+   `npx @saucam/anyagent sync --to codex gemini cursor`
    → your Claude skills + agents + CLAUDE.md show up natively in all three.
 4. It's honest about what doesn't translate. Lossy conversions are *reported*,
    not silently dropped. Trust > magic.

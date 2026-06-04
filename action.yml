@@ -23,4 +23,4 @@ runs:
   steps:
     - name: anyagent check
       shell: bash
-      run: npx -y anyagent@${{ inputs.version }} check --root "${{ inputs.root }}" --to ${{ inputs.to }}
+      run: npx -y @saucam/anyagent@${{ inputs.version }} check --root "${{ inputs.root }}" --to ${{ inputs.to }}

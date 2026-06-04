@@ -7,7 +7,7 @@
 **Stop re-teaching every AI agent how you work.**
 
 [![CI](https://github.com/saucam/anyagent/actions/workflows/ci.yml/badge.svg)](https://github.com/saucam/anyagent/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/anyagent.svg)](https://www.npmjs.com/package/anyagent)
+[![npm](https://img.shields.io/npm/v/@saucam/anyagent.svg)](https://www.npmjs.com/package/@saucam/anyagent)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](https://nodejs.org)
 [![zero deps](https://img.shields.io/badge/runtime%20deps-0-success.svg)](package.json)
@@ -23,7 +23,7 @@ You spent weeks building your **Claude Code** setup — skills, subagents, proje
 **anyagent** keeps your Claude Code `.claude/` workspace as the single source of truth and projects it into the native formats other agents already know how to read. One canonical setup. Every assistant. No duplicated folders, no copy-paste drift.
 
 ```bash
-npx anyagent sync --to codex gemini cursor
+npx @saucam/anyagent sync --to codex gemini cursor
 ```
 
 That's it. Your Claude skills now show up in Codex's `.agents/skills/`, your agents become Codex TOML / Gemini Markdown / Cursor `.mdc` rules, and your `CLAUDE.md` becomes `AGENTS.md`, `GEMINI.md`, and a Cursor workspace rule — all generated from the one workspace you already maintain.
@@ -31,17 +31,20 @@ That's it. Your Claude skills now show up in Codex's `.agents/skills/`, your age
 ## 30-second demo
 
 ```bash
+# Tip: install once with `npm i -g @saucam/anyagent` and drop the `npx @saucam/`
+# prefix below — the command is just `anyagent`.
+
 # 1. Scaffold a canonical workspace (or use your existing .claude/)
-npx anyagent init
+npx @saucam/anyagent init
 
 # 2. See exactly what anyagent can find
-npx anyagent doctor
+npx @saucam/anyagent doctor
 
 # 3. Preview every change without touching disk
-npx anyagent plan --to codex gemini cursor
+npx @saucam/anyagent plan --to codex gemini cursor
 
 # 4. Bridge it
-npx anyagent sync --to codex gemini cursor
+npx @saucam/anyagent sync --to codex gemini cursor
 ```
 
 Now the *same* Claude-origin skill and reviewer agent are discoverable in Codex, Gemini, and Cursor — no rewrite, no second copy to keep in sync.
@@ -91,14 +94,14 @@ $ anyagent sync --to codex
 Run it with no install:
 
 ```bash
-npx anyagent <command>
+npx @saucam/anyagent <command>
 ```
 
-Or install globally:
+Or install globally (the binary is `anyagent`):
 
 ```bash
-npm install -g anyagent
-anyagent sync --to codex gemini
+npm install -g @saucam/anyagent
+anyagent sync --to codex gemini cursor
 ```
 
 Requires **Node.js ≥ 20**. Zero runtime dependencies.
