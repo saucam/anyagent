@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output (published to npm via prepublishOnly, not committed)
+dist/
+
+# Generated bridge outputs in the example workspace (regenerate with `npm run demo`)
+examples/claude-source/.agents/
+examples/claude-source/.codex/
+examples/claude-source/.gemini/
+examples/claude-source/.hermes/
+examples/claude-source/AGENTS.md
+examples/claude-source/GEMINI.md
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*

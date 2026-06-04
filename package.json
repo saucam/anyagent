@@ -1,0 +1,57 @@
+{
+  "name": "anyagent",
+  "version": "0.1.0",
+  "description": "Write your agent setup once, run it in any agent. Bridge Claude Code skills, agents, and workspace guidance into Codex, Gemini, and local Hermes layouts.",
+  "type": "module",
+  "bin": {
+    "anyagent": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "test": "node --import tsx --test test/*.test.ts",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "doctor": "tsx src/cli.ts doctor",
+    "demo": "tsx src/cli.ts sync --root examples/claude-source --to codex gemini hermes --dry-run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "gemini",
+    "hermes",
+    "skills",
+    "agents",
+    "subagents",
+    "agents-md",
+    "ai-coding",
+    "developer-tools",
+    "portability",
+    "interoperability"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saucam/anyagent.git"
+  },
+  "homepage": "https://github.com/saucam/anyagent#readme",
+  "bugs": {
+    "url": "https://github.com/saucam/anyagent/issues"
+  },
+  "author": "Yash Datta (https://github.com/saucam)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,27 @@
+name: Target adapter request
+description: Ask for support for another agent (Cursor, Windsurf, Aider, OpenCode, ...).
+labels: ["adapter", "enhancement"]
+body:
+  - type: input
+    id: tool
+    attributes:
+      label: Which tool?
+      placeholder: "Cursor"
+    validations:
+      required: true
+  - type: textarea
+    id: layout
+    attributes:
+      label: Native layout
+      description: Where does this tool look for skills, agents, and project guidance? Link docs if you can.
+      placeholder: |
+        skills:   .cursor/...
+        agents:   .cursor/...
+        guidance: .cursor/rules/*.mdc
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Conversion notes
+      description: Anything that won't map cleanly from Claude (hooks, tool policies, frontmatter)?
