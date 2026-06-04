@@ -1,0 +1,59 @@
+<svg viewBox="0 0 1400 720" width="1400" height="720" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, system-ui, sans-serif" fill="#1F2933">
+<defs>
+  <marker id="arrow-grey" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B7280"/>
+  </marker>
+  <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#2C5F8C"/>
+  </marker>
+  <marker id="arrow-peach" viewBox="0 0 10 10" refX="9" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#C26A4F"/>
+  </marker>
+</defs>
+<rect x="0" y="0" width="1400" height="720" fill="#FFFFFF"/>
+<text x="700.0" y="44" font-size="22" fill="#1F2933" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">Write your agent setup once. Run it in any agent.</text>
+<text x="700.0" y="73" font-size="13" fill="#6B7280" font-weight="500" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">anyagent bridges one Claude Code .claude/ workspace into Codex, Gemini, Cursor, and Hermes.</text>
+<text x="230" y="116" font-size="11" fill="#2C5F8C" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">SOURCE  ·  CLAUDE CODE</text>
+<text x="1119" y="116" font-size="11" fill="#C26A4F" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">TARGETS  ·  OTHER AGENTS</text>
+<rect x="50" y="132" width="360" height="430" rx="14" fill="#F6F9FC" stroke="#E5E7EB" stroke-width="1.4"/>
+<rect x="880" y="132" width="478" height="430" rx="14" fill="#FDF8F5" stroke="#E5E7EB" stroke-width="1.4"/>
+<rect x="85" y="165" width="290" height="150" rx="8" fill="#E2ECF6" stroke="#2C5F8C" stroke-width="2.6"/>
+<text x="230.0" y="216.5" font-size="14" fill="#2C5F8C" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">.claude/</text>
+<text x="230.0" y="235.5" font-size="12.5" fill="#2C5F8C" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">skills/</text>
+<text x="230.0" y="254.5" font-size="12.5" fill="#2C5F8C" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">agents/</text>
+<text x="230.0" y="273.5" font-size="12.5" fill="#2C5F8C" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">settings.json</text>
+<rect x="85" y="345" width="290" height="62" rx="8" fill="#E2ECF6" stroke="#2C5F8C" stroke-width="1.5"/>
+<text x="230.0" y="371.5" font-size="12.5" fill="#2C5F8C" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">CLAUDE.md</text>
+<text x="230.0" y="390.5" font-size="13" fill="#2C5F8C" font-weight="600" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">repo-root guide</text>
+<rect x="455" y="329" width="182" height="44" rx="22" fill="#EAF2FA" stroke="#2C5F8C" stroke-width="2.2"/>
+<text x="546" y="356" font-size="13.5" fill="#2C5F8C" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">anyagent sync</text>
+<path d="M 377 240 C 422 240, 432 351, 451 351" fill="none" stroke="#2C5F8C" stroke-width="1.7" marker-end="url(#arrow-blue)"/>
+<path d="M 377 374 C 422 374, 432 351, 451 351" fill="none" stroke="#2C5F8C" stroke-width="1.7" marker-end="url(#arrow-blue)"/>
+<rect x="900" y="150" width="440" height="96" rx="8" fill="#FCEFE7" stroke="#C26A4F" stroke-width="1.5"/>
+<text x="1120.0" y="174.5" font-size="14" fill="#7A3E2B" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">Codex</text>
+<text x="1120.0" y="193.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">.agents/skills/</text>
+<text x="1120.0" y="212.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">.codex/agents/*.toml</text>
+<text x="1120.0" y="231.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">AGENTS.md</text>
+<rect x="900" y="262" width="440" height="96" rx="8" fill="#FCEFE7" stroke="#C26A4F" stroke-width="1.5"/>
+<text x="1120.0" y="286.5" font-size="14" fill="#7A3E2B" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">Gemini</text>
+<text x="1120.0" y="305.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">.gemini/skills/</text>
+<text x="1120.0" y="324.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">.gemini/agents/*.md</text>
+<text x="1120.0" y="343.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">GEMINI.md</text>
+<rect x="900" y="374" width="440" height="64" rx="8" fill="#FCEFE7" stroke="#C26A4F" stroke-width="1.5"/>
+<text x="1120.0" y="401.5" font-size="14" fill="#7A3E2B" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">Cursor</text>
+<text x="1120.0" y="420.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">.cursor/rules/*.mdc</text>
+<rect x="900" y="454" width="440" height="74" rx="8" fill="#FCEFE7" stroke="#C26A4F" stroke-width="1.5"/>
+<text x="1120.0" y="486.5" font-size="14" fill="#7A3E2B" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">Hermes</text>
+<text x="1120.0" y="505.5" font-size="12.5" fill="#7A3E2B" font-weight="500" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Consolas, monospace">.hermes/WORKSPACE.md</text>
+<path d="M 639 346 C 762 300, 800 198, 896 198" fill="none" stroke="#C26A4F" stroke-width="1.8" marker-end="url(#arrow-peach)"/>
+<path d="M 639 350 C 772 332, 800 310, 896 310" fill="none" stroke="#C26A4F" stroke-width="1.8" marker-end="url(#arrow-peach)"/>
+<path d="M 639 354 C 772 384, 800 406, 896 406" fill="none" stroke="#C26A4F" stroke-width="1.8" marker-end="url(#arrow-peach)"/>
+<path d="M 639 358 C 762 424, 800 491, 896 491" fill="none" stroke="#C26A4F" stroke-width="1.8" marker-end="url(#arrow-peach)"/>
+<rect x="50" y="600" width="1308" height="92" rx="14" fill="#F0F6F1" stroke="#4A8054" stroke-width="2.2"/>
+<text x="700.0" y="630" font-size="11.5" fill="#4A8054" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">EDIT ONCE</text>
+<text x="700.0" y="658" font-size="17" fill="#3F6E48" font-weight="700" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">Edit once. Every agent stays in sync.</text>
+<text x="700.0" y="680" font-size="12.5" fill="#3F6E48" font-weight="500" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif">anyagent sync regenerates every target from the source; anyagent check flags drift.</text>
+</svg>

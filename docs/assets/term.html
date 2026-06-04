@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --bg0:#0a0e14; --card:#0b1017; --bar:#11161f; --line:#222b36;
+    --fg:#c9d1d9; --dim:#6e7b8a; --dollar:#56708a;
+    --green:#3fb950; --blue:#58a6ff; --teal:#2dd4bf; --purple:#bc8cff;
+    --warn:#d29922; --accent:#58a6ff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1200px;height:760px;background:var(--bg0)}
+  body{padding:22px;background:radial-gradient(900px 420px at 50% -10%,#141b26 0%,#0a0e14 60%)}
+  .term{width:100%;height:100%;background:var(--card);border:1px solid var(--line);
+    border-radius:13px;box-shadow:0 24px 60px -24px rgba(0,0,0,.7);display:flex;flex-direction:column;overflow:hidden}
+  .bar{height:40px;flex:0 0 40px;background:var(--bar);display:flex;align-items:center;padding:0 16px;
+    border-bottom:1px solid var(--line);gap:9px}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .r{background:#ff5f56}.y{background:#ffbd2e}.g{background:#27c93f}
+  .title{margin-left:14px;color:var(--dim);font:600 13px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.02em}
+  .body{flex:1;min-height:0;padding:16px 22px 18px;overflow:hidden;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    font-family:"DejaVu Sans Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+    font-size:15px;line-height:1.5;color:var(--fg);white-space:pre-wrap;word-break:break-word}
+  .ln{display:block}
+  .blank{display:block;height:.75em}
+  .dollar{color:var(--dollar);font-weight:700}
+  .cmdtext{color:#e6edf3;font-weight:600}
+  .ok{color:var(--green)} .okfinal{color:var(--green);font-weight:700}
+  .codex{color:var(--blue)} .gemini{color:var(--teal)} .cursor{color:var(--purple)}
+  .dim{color:var(--dim)} .warn{color:var(--warn)} .bullet{color:var(--dim)}
+  .next{color:var(--dim)} .summary{color:#e6edf3;font-weight:700} .accent{color:var(--accent);font-weight:600}
+  .header{color:var(--dim)} .out{color:var(--fg)}
+  .cur{display:inline-block;width:.6em;color:#e6edf3}
+</style>
+</head>
+<body>
+  <div class="term">
+    <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="title">anyagent — demo</span></div>
+    <div class="body" id="body"></div>
+  </div>
+
+<script>
+const FPS = 13, CPF = 4;
+const beats = [
+  { cmd: "anyagent init", settle: 12, out: [
+    "created CLAUDE.md",
+    "created .claude/agents/reviewer.md",
+    "created .claude/skills/reviewer/SKILL.md",
+    "",
+    "Next: `anyagent sync --to codex gemini cursor`",
+  ]},
+  { cmd: "anyagent doctor", settle: 14, out: [
+    "anyagent doctor — ~/acme-bot",
+    "",
+    "✓ .claude directory",
+    "✓ CLAUDE.md            CLAUDE.md",
+    "✓  1 skill(s)",
+    "     • reviewer  ←  .claude/skills/reviewer/SKILL.md",
+    "✓  1 agent(s)",
+    "     • reviewer  ←  .claude/agents/reviewer.md",
+    "✓  0 settings file(s)",
+    "",
+    "3 portable artifact(s) ready to bridge into: codex, gemini, cursor, hermes",
+    "Next: anyagent sync --to codex gemini cursor hermes",
+  ]},
+  { cmd: "anyagent sync --to codex gemini cursor", settle: 16, out: [
+    "[codex] link skill",
+    "  from: .claude/skills/reviewer",
+    "  to:   .agents/skills/reviewer",
+    "[codex] converted agent",
+    "  from: .claude/agents/reviewer.md",
+    "  to:   .codex/agents/reviewer.toml",
+    "  warn: Claude agent tool and hook semantics are preserved as instructions, not native Codex policy.",
+    "[codex] generated guide",
+    "  from: CLAUDE.md",
+    "  to:   AGENTS.md",
+    "[gemini] link skill",
+    "  from: .claude/skills/reviewer",
+    "  to:   .gemini/skills/reviewer",
+    "[gemini] converted agent",
+    "  from: .claude/agents/reviewer.md",
+    "  to:   .gemini/agents/reviewer.md",
+    "  warn: Gemini agent schema support is target-specific; this version preserves the Claude agent as readable instructions.",
+    "[gemini] generated guide",
+    "  from: CLAUDE.md",
+    "  to:   GEMINI.md",
+    "[cursor] converted skill",
+    "  from: .claude/skills/reviewer/SKILL.md",
+    "  to:   .cursor/rules/skill-reviewer.mdc",
+    "  warn: Cursor has no native skill format; converted to an agent-requested rule. Scripts and assets alongside SKILL.md are not carried into the rule.",
+    "[cursor] converted agent",
+    "  from: .claude/agents/reviewer.md",
+    "  to:   .cursor/rules/agent-reviewer.mdc",
+    "  warn: Cursor has no subagent concept; preserved as an opt-in (.mdc) rule, not an isolated agent with its own tool policy.",
+    "[cursor] generated guide",
+    "  from: CLAUDE.md",
+    "  to:   .cursor/rules/workspace.mdc",
+    "",
+    "9 operation(s), 4 warning(s)",
+  ]},
+  { cmd: "anyagent check --to codex gemini cursor", settle: 26, out: [
+    "✓ up to date — 9 bridged artifact(s) match the source.",
+  ]},
+];
+
+function classify(s){
+  const t = s.trim();
+  if (t === "") return "blank";
+  if (t.startsWith("✓ up to date")) return "okfinal";
+  if (t.startsWith("✓")) return "ok";
+  if (t.startsWith("warn:")) return "warn";
+  if (t.startsWith("from:") || t.startsWith("to:")) return "dim";
+  if (t.startsWith("•")) return "bullet";
+  if (s.startsWith("[codex]")) return "codex";
+  if (s.startsWith("[gemini]")) return "gemini";
+  if (s.startsWith("[cursor]")) return "cursor";
+  if (t.startsWith("Next:")) return "next";
+  if (/operation\(s\)/.test(t)) return "summary";
+  if (/portable artifact/.test(t)) return "accent";
+  if (t.startsWith("anyagent doctor")) return "header";
+  return "out";
+}
+
+// --- build deterministic frame timeline ---
+const frames = [];
+let completed = [];
+function snap(typing){ frames.push({ lines: completed.slice(), typing: typing ? {cmd: typing.cmd} : null }); }
+function hold(n, typing){ for (let i=0;i<n;i++) snap(typing); }
+
+for (const b of beats){
+  const full = b.cmd;
+  for (let k=CPF; k<full.length; k+=CPF) snap({cmd: full.slice(0,k)});
+  hold(4, {cmd: full});                       // full command, settle before Enter
+  completed.push({s: full, c: "cmd"});         // commit command
+  snap(null);
+  for (const line of b.out){ completed.push({s: line, c: classify(line)}); snap(null); }
+  hold(b.settle, {cmd: ""});                   // ready prompt blinking
+}
+document.title = "FRAMES:" + frames.length;
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function lineHTML(o){
+  if (o.c === "blank") return '<span class="blank"></span>';
+  if (o.c === "cmd") return '<span class="ln"><span class="dollar">$</span> <span class="cmdtext">'+esc(o.s)+'</span></span>';
+  return '<span class="ln '+o.c+'">'+esc(o.s)+'</span>';
+}
+
+function render(f){
+  const st = frames[Math.min(f, frames.length-1)];
+  let html = st.lines.map(lineHTML).join("");
+  if (st.typing){
+    const on = (f % 14) < 8;
+    const cur = '<span class="cur" style="opacity:'+(on?1:0.12)+'">█</span>';
+    html += '<span class="ln"><span class="dollar">$</span> <span class="cmdtext">'+esc(st.typing.cmd)+'</span>'+cur+'</span>';
+  }
+  document.getElementById("body").innerHTML = html;
+}
+
+const f = parseInt(new URLSearchParams(location.search).get("f") || "0", 10);
+render(f);
+</script>
+</body>
+</html>

@@ -14,9 +14,7 @@
 
 </div>
 
-<!-- MEDIA:demo — when docs/assets/demo.gif lands (see docs/assets/SPEC.md), replace this comment with:
 <div align="center"><img src="docs/assets/demo.gif" alt="anyagent demo: one Claude Code setup synced into Codex, Gemini, and Cursor" width="760"></div>
--->
 
 ---
 
@@ -65,27 +63,7 @@ The next layer of value isn't another agent. It's the **compatibility layer betw
 
 ## How it works
 
-<!-- MEDIA:architecture — when docs/assets/architecture.svg lands (see docs/assets/SPEC.md),
-replace the ASCII block below with: <div align="center"><img src="docs/assets/architecture.svg" alt="anyagent architecture: one .claude/ source fanning out to Codex, Gemini, Cursor, and Hermes" width="900"></div> -->
-
-```
-            ┌──────────────────────────┐
-            │   Canonical source       │
-            │   .claude/ ( skills/     │
-            │             agents/      │
-            │             settings )   │
-            │   CLAUDE.md              │
-            └────────────┬─────────────┘
-                         │  anyagent sync
-        ┌────────────┬───┴───┬────────────┐
-        ▼            ▼       ▼             ▼
-   ┌─────────┐ ┌─────────┐ ┌────────┐ ┌─────────┐
-   │  Codex  │ │ Gemini  │ │ Cursor │ │ Hermes  │
-   │ .agents │ │ .gemini │ │ .cursor│ │ .hermes │
-   │ .codex  │ │ GEMINI  │ │ /rules │ │WORKSPACE│
-   │ AGENTS  │ │  .md    │ │ *.mdc  │ │  .md    │
-   └─────────┘ └─────────┘ └────────┘ └─────────┘
-```
+<div align="center"><img src="docs/assets/architecture.svg" alt="anyagent architecture: one .claude/ source fanning out to Codex, Gemini, Cursor, and Hermes" width="900"></div>
 
 - **Skills are symlinked** (relative links, so your workspace stays portable) into each target's native skill folder. Edit once, every agent sees the change instantly. (Cursor has no skill folder, so skills become `.mdc` rules.)
 - **Agents are converted** into each target's manifest — Codex TOML, Gemini/Hermes Markdown, Cursor `.mdc` — preserving the original instructions.
