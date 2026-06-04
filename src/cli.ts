@@ -26,10 +26,10 @@ function usage(): string {
 Usage:
   anyagent init   [--root <path>] [--dry-run]
   anyagent doctor [--root <path>]
-  anyagent plan   [--root <path>] [--to codex gemini cursor hermes] [--copy]
-  anyagent sync   [--root <path>] [--to codex gemini cursor hermes] [--copy] [--dry-run]
-  anyagent check  [--root <path>] [--to codex gemini cursor hermes]
-  anyagent watch  [--root <path>] [--to codex gemini cursor hermes] [--interval-ms 2000]
+  anyagent plan   [--root <path>] [--to codex gemini cursor windsurf hermes] [--copy]
+  anyagent sync   [--root <path>] [--to codex gemini cursor windsurf hermes] [--copy] [--dry-run]
+  anyagent check  [--root <path>] [--to codex gemini cursor windsurf hermes]
+  anyagent watch  [--root <path>] [--to codex gemini cursor windsurf hermes] [--interval-ms 2000]
 
 Commands:
   init    Scaffold a starter canonical .claude/ workspace (never overwrites).
@@ -40,14 +40,15 @@ Commands:
   watch   Re-run sync on an interval so targets track the source.
 
 Targets:
-  codex   .agents/skills, .codex/agents/*.toml, AGENTS.md
-  gemini  .gemini/skills, .gemini/agents/*.md, GEMINI.md
-  cursor  .cursor/rules/*.mdc
-  hermes  .hermes/skills, .hermes/agents/*.md, .hermes/WORKSPACE.md
+  codex     .agents/skills, .codex/agents/*.toml, AGENTS.md
+  gemini    .gemini/skills, .gemini/agents/*.md, GEMINI.md
+  cursor    .cursor/rules/*.mdc
+  windsurf  .windsurf/rules/*.md, .windsurf/workflows/*.md
+  hermes    .hermes/skills, .hermes/agents/*.md, .hermes/WORKSPACE.md
 
 Defaults:
   --root .
-  --to codex gemini cursor hermes
+  --to codex gemini cursor windsurf hermes
   mode is symlink unless --copy is passed
 `;
 }

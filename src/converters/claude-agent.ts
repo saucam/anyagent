@@ -97,3 +97,42 @@ export async function convertClaudeSkillToCursor(skill: ClaudeSkill): Promise<Co
     ]
   };
 }
+
+function windsurfRuleFrontmatter(description: string, trigger: 'always_on' | 'manual'): string {
+  // Windsurf rules (.windsurf/rules/*.md) read `trigger` and `description`.
+  return `---\ntrigger: ${trigger}\ndescription: ${JSON.stringify(description)}\n---\n`;
+}
+
+export async function convertClaudeAgentToWindsurf(agent: ClaudeAgent): Promise<ConvertedAgent> {
+  const body = await readText(agent.file);
+  const description = `Agent: ${titleFromName(agent.name)} (imported from Claude Code via anyagent)`;
+  const content =
+    windsurfRuleFrontmatter(description, 'manual') +
+    `\n# ${titleFromName(agent.name)}\n\nImported from Claude Code agent: ${sourceRef(agent)}\n\n${stripFrontmatter(body)}`;
+  return {
+    fileName: `agent-${agent.name}.md`,
+    content,
+    warnings: [
+      'Windsurf has no subagent concept; preserved as a manually-triggered rule, not an isolated agent with its own tool policy.'
+    ]
+  };
+}
+
+export async function convertClaudeSkillToWindsurf(skill: ClaudeSkill): Promise<ConvertedAgent> {
+  // A Claude skill is a reusable, invocable procedure — Windsurf's nearest
+  // native concept is a workflow (.windsurf/workflows/*.md, invoked with /name).
+  const raw = await readText(skill.skillFile);
+  const description =
+    frontmatterValue(raw, 'description') ?? `Skill: ${titleFromName(skill.name)} (imported from Claude Code via anyagent)`;
+  const ref = rel(skill.projectRoot, skill.skillFile);
+  const content =
+    `---\ndescription: ${JSON.stringify(description)}\n---\n` +
+    `\n# ${titleFromName(skill.name)}\n\nImported from Claude Code skill: ${ref}\n\n${stripFrontmatter(raw)}`;
+  return {
+    fileName: `${skill.name}.md`,
+    content,
+    warnings: [
+      `Mapped to a Windsurf workflow (invoke with /${skill.name}). Scripts and assets alongside SKILL.md are not carried into the workflow.`
+    ]
+  };
+}

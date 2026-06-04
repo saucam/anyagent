@@ -68,10 +68,10 @@ The next layer of value isn't another agent. It's the **compatibility layer betw
 
 <div align="center"><img src="docs/assets/architecture.svg" alt="anyagent architecture: one .claude/ source fanning out to Codex, Gemini, Cursor, and Hermes" width="900"></div>
 
-- **Skills are symlinked** (relative links, so your workspace stays portable) into each target's native skill folder. Edit once, every agent sees the change instantly. (Cursor has no skill folder, so skills become `.mdc` rules.)
-- **Agents are converted** into each target's manifest — Codex TOML, Gemini/Hermes Markdown, Cursor `.mdc` — preserving the original instructions.
-- **Workspace guidance is generated**: `CLAUDE.md` → `AGENTS.md` / `GEMINI.md` / `.cursor/rules/workspace.mdc` / `.hermes/WORKSPACE.md`.
-- **Lossy conversions are reported, never silent.** When a Claude-specific concept (hooks, tool policies, or Cursor's lack of subagents) has no native equivalent, anyagent preserves it as readable instructions and prints a `warn:` line. Trust comes from honesty.
+- **Skills are symlinked** (relative links, so your workspace stays portable) into each target's native skill folder. Edit once, every agent sees the change instantly. (Cursor has no skill folder, so skills become `.mdc` rules; Windsurf maps them to native `/workflows`.)
+- **Agents are converted** into each target's manifest — Codex TOML, Gemini/Hermes Markdown, Cursor `.mdc`, Windsurf rules — preserving the original instructions.
+- **Workspace guidance is generated**: `CLAUDE.md` → `AGENTS.md` / `GEMINI.md` / `.cursor/rules/workspace.mdc` / `.windsurf/rules/workspace.md` / `.hermes/WORKSPACE.md`.
+- **Lossy conversions are reported, never silent.** When a Claude-specific concept (hooks, tool policies, or Cursor/Windsurf's lack of subagents) has no native equivalent, anyagent preserves it as readable instructions and prints a `warn:` line. Trust comes from honesty.
 
 ```
 $ anyagent sync --to codex
@@ -169,15 +169,15 @@ Run `anyagent sync` to update them.
 | Codex | ✅ | Skills (symlink), agents (TOML), `AGENTS.md` |
 | Gemini | ✅ | Skills (symlink), agents (Markdown), `GEMINI.md` |
 | Cursor | ✅ | Skills + agents → `.cursor/rules/*.mdc`, workspace rule from `CLAUDE.md` |
+| Windsurf | ✅ | Skills → `.windsurf/workflows/*.md`, agents + `CLAUDE.md` → `.windsurf/rules/*.md` |
 | Hermes | ✅ | Skills (symlink), agents (Markdown), `.hermes/WORKSPACE.md` |
-| Windsurf | 🔭 roadmap | — |
 | Aider / OpenCode | 🔭 roadmap | — |
 
 Want a target? [Open an issue](https://github.com/saucam/anyagent/issues/new/choose) or read [CONTRIBUTING.md](CONTRIBUTING.md) — adapters are ~40 lines and share a tested contract.
 
 ## Roadmap
 
-- Windsurf, Aider, and OpenCode adapters
+- Aider and OpenCode adapters
 - MCP config normalization across tools
 - A hook-compatibility matrix
 - Cross-agent command conversion

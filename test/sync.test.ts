@@ -48,7 +48,7 @@ test('generated files never leak an absolute home path', async () => {
   const ws = await makeWorkspace();
   try {
     const source = await discoverClaudeWorkspace(ws.root);
-    for (const target of ['codex', 'gemini', 'cursor', 'hermes'] as const) {
+    for (const target of ['codex', 'gemini', 'cursor', 'windsurf', 'hermes'] as const) {
       await getAdapter(target).sync(source, options(ws.root, { targets: [target] }), createReport());
     }
     const generated = [
@@ -58,7 +58,10 @@ test('generated files never leak an absolute home path', async () => {
       '.codex/agents/reviewer.toml',
       '.cursor/rules/workspace.mdc',
       '.cursor/rules/agent-reviewer.mdc',
-      '.cursor/rules/skill-reviewer.mdc'
+      '.cursor/rules/skill-reviewer.mdc',
+      '.windsurf/rules/workspace.md',
+      '.windsurf/rules/agent-reviewer.md',
+      '.windsurf/workflows/reviewer.md'
     ];
     for (const file of generated) {
       const content = await read(ws.root, file);
@@ -117,11 +120,50 @@ test('every adapter plan and sync agree on the same targets', async () => {
   const ws = await makeWorkspace();
   try {
     const source = await discoverClaudeWorkspace(ws.root);
-    for (const target of ['codex', 'gemini', 'cursor', 'hermes'] as const) {
+    for (const target of ['codex', 'gemini', 'cursor', 'windsurf', 'hermes'] as const) {
       const adapter = getAdapter(target);
       const ops = await adapter.plan(source, options(ws.root, { targets: [target] }));
       assert.ok(ops.length >= 3, `${target} should plan at least skill + agent + guide`);
     }
+  } finally {
+    await ws.cleanup();
+  }
+});
+
+test('windsurf sync maps skills to workflows, agents to rules, with frontmatter', async () => {
+  const ws = await makeWorkspace();
+  try {
+    const source = await discoverClaudeWorkspace(ws.root);
+    await getAdapter('windsurf').sync(source, options(ws.root, { targets: ['windsurf'] }), createReport());
+
+    // Skill → workflow (the closest native Windsurf concept).
+    const workflow = await read(ws.root, '.windsurf/workflows/reviewer.md');
+    assert.match(workflow, /description: "Code review skill\."/);
+
+    // Workspace guide → always-on rule.
+    const workspace = await read(ws.root, '.windsurf/rules/workspace.md');
+    assert.match(workspace, /trigger: always_on/);
+
+    // Agent → manually-triggered rule.
+    const agentRule = await read(ws.root, '.windsurf/rules/agent-reviewer.md');
+    assert.match(agentRule, /trigger: manual/);
+    assert.match(agentRule, /Reviewer Agent/);
+
+    // No skill folder is symlinked.
+    assert.equal(await exists(ws.root, '.windsurf/skills'), false);
+  } finally {
+    await ws.cleanup();
+  }
+});
+
+test('windsurf conversions are reported as lossy (warnings present)', async () => {
+  const ws = await makeWorkspace();
+  try {
+    const source = await discoverClaudeWorkspace(ws.root);
+    const report = createReport();
+    await getAdapter('windsurf').sync(source, options(ws.root, { targets: ['windsurf'] }), report);
+    const warned = report.entries.filter((e) => e.warnings.length > 0);
+    assert.ok(warned.length >= 2, 'skill and agent conversions should both warn about lossiness');
   } finally {
     await ws.cleanup();
   }
@@ -169,7 +211,7 @@ test('check mode: clean after sync, dirty after the source changes, writes nothi
   const ws = await makeWorkspace();
   try {
     let source = await discoverClaudeWorkspace(ws.root);
-    const targets = ['codex', 'gemini', 'cursor', 'hermes'] as const;
+    const targets = ['codex', 'gemini', 'cursor', 'windsurf', 'hermes'] as const;
 
     // First, bring everything in sync.
     for (const target of targets) {

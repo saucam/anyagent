@@ -47,12 +47,12 @@ export interface TargetAdapter {
 }
 ```
 
-To add, say, a `windsurf` adapter (`cursor` is already built — read [`src/adapters/cursor.ts`](src/adapters/cursor.ts) as the reference for a generate-only target):
+To add, say, an `aider` adapter (`cursor` and `windsurf` are already built — read [`src/adapters/cursor.ts`](src/adapters/cursor.ts) or [`src/adapters/windsurf.ts`](src/adapters/windsurf.ts) as references for a generate-only target):
 
-1. Add `'windsurf'` to `TargetName` in `src/types.ts`.
-2. Create `src/adapters/windsurf.ts` exporting a `windsurfAdapter: TargetAdapter`. Use `linkOrCopyDir` for skills (if the target has a skill folder) and `writeOutput` for generated guidance — both produce **relative** paths, and `writeOutput` makes the target check-aware for free.
+1. Add `'aider'` to `TargetName` in `src/types.ts`.
+2. Create `src/adapters/aider.ts` exporting an `aiderAdapter: TargetAdapter`. Use `linkOrCopyDir` for skills (if the target has a skill folder) and `writeOutput` for generated guidance — both produce **relative** paths, and `writeOutput` makes the target check-aware for free.
 3. Register it in `src/adapters/index.ts`.
-4. If agents need a target-specific shape, add `convertClaudeAgentToWindsurf` in `src/converters/claude-agent.ts`.
+4. If agents need a target-specific shape, add `convertClaudeAgentToAider` in `src/converters/claude-agent.ts`.
 5. Add a spec in `test/sync.test.ts`, and extend the cross-target loops (the "no absolute path leaks" and "check mode" tests) to include your target.
 
 ### Non-negotiables for adapters

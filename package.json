@@ -1,7 +1,7 @@
 {
   "name": "@saucam/anyagent",
-  "version": "0.2.1",
-  "description": "Write your agent setup once, run it in any agent. Bridge Claude Code skills, agents, and workspace guidance into Codex, Gemini, Cursor, and local Hermes layouts.",
+  "version": "0.3.0",
+  "description": "Write your agent setup once, run it in any agent. Bridge Claude Code skills, agents, and workspace guidance into Codex, Gemini, Cursor, Windsurf, and local Hermes layouts.",
   "type": "module",
   "bin": {
     "anyagent": "./dist/cli.js"
@@ -34,6 +34,7 @@
     "gemini",
     "cursor",
     "cursor-rules",
+    "windsurf",
     "hermes",
     "skills",
     "agents",

@@ -9,6 +9,7 @@ examples/claude-source/.agents/
 examples/claude-source/.codex/
 examples/claude-source/.gemini/
 examples/claude-source/.cursor/
+examples/claude-source/.windsurf/
 examples/claude-source/.hermes/
 examples/claude-source/AGENTS.md
 examples/claude-source/GEMINI.md

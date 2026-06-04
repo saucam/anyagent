@@ -1,4 +1,4 @@
-export type TargetName = 'codex' | 'gemini' | 'cursor' | 'hermes';
+export type TargetName = 'codex' | 'gemini' | 'cursor' | 'windsurf' | 'hermes';
 
 export type LinkMode = 'link' | 'copy';
 
