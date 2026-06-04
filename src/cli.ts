@@ -5,6 +5,7 @@ import { getAdapter, listAdapters } from './adapters/index.js';
 import { createReport, printCheck, printReport } from './report.js';
 import { rel } from './fs-utils.js';
 import { initWorkspace } from './init.js';
+import { getVersion } from './version.js';
 import type { BridgeOptions, LinkMode, TargetName } from './types.js';
 
 interface ParsedArgs {
@@ -188,6 +189,10 @@ async function watch(args: ParsedArgs): Promise<void> {
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+  if (args.command === 'version' || args.command === '--version' || args.command === '-v') {
+    console.log(getVersion());
+    return;
+  }
   if (args.command === 'help' || args.command === '--help' || args.command === '-h') {
     console.log(usage());
     return;

@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-04
+
+### Added
+
+- `anyagent --version` / `-v` — print the installed version.
+
+### Changed
+
+- Published under the `@saucam/anyagent` scope (npm blocks the bare `anyagent` name). Install with `npx @saucam/anyagent`.
+- Releases now publish via npm Trusted Publishing (OIDC) — token-free, with automatic provenance.
+
 ## [0.2.0] - 2026-06-04
 
 ### Added
@@ -42,6 +53,7 @@ Initial public release.
 This is the first release under the name **anyagent** (previously prototyped as
 `agent-bridge`). The bridge is intentionally filesystem-first and dependency-free.
 
-[Unreleased]: https://github.com/saucam/anyagent/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/saucam/anyagent/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/saucam/anyagent/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/saucam/anyagent/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/saucam/anyagent/releases/tag/v0.1.0
