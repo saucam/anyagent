@@ -1,22 +1,15 @@
 name: Release
 
-# Publishes anyagent to npm when you publish a GitHub Release.
+# Publishes @saucam/anyagent to npm when you publish a GitHub Release.
 #
-# Two ways to authenticate (pick one):
+# Auth is npm Trusted Publishing (OIDC) — no token, no 2FA prompt, provenance
+# is automatic. Prerequisite (one time): on npmjs.com → @saucam/anyagent →
+# Settings → Trusted Publisher → GitHub Actions → repo `saucam/anyagent`,
+# workflow `release.yml`. The `id-token: write` permission below is what lets
+# the runner mint a short-lived publish credential.
 #
-#  A) npm Trusted Publishing (OIDC) — RECOMMENDED, no long-lived token.
-#     1. Publish once manually (`npm publish --access public`) so the package exists.
-#     2. On npmjs.com → package → Settings → Trusted Publishers, add this repo +
-#        the `release.yml` workflow.
-#     3. Delete the NPM_TOKEN secret; the `id-token: write` permission below does
-#        the rest, and `--provenance` is automatic.
-#
-#  B) Automation token — simplest to start.
-#     1. npmjs.com → Access Tokens → Generate → "Automation".
-#     2. Repo → Settings → Secrets → Actions → add `NPM_TOKEN`.
-#
-# Either way: cut a release from the GitHub UI (Releases → Draft a new release →
-# tag vX.Y.Z) and this workflow publishes that version.
+# To ship: cut a release from the GitHub UI (Releases → Draft a new release →
+# tag vX.Y.Z, where X.Y.Z matches package.json) and this workflow publishes it.
 
 on:
   release:
@@ -24,7 +17,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # enables npm provenance / OIDC trusted publishing
+  id-token: write # OIDC: lets npm trusted publishing mint a short-lived token
 
 jobs:
   publish:
@@ -37,6 +30,10 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
           cache: npm
+
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; node 22 ships npm 10.x.
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
 
       - run: npm ci
 
@@ -53,7 +50,7 @@ jobs:
       - run: npm test
       - run: npm run build
 
+      # No NODE_AUTH_TOKEN: trusted publishing authenticates via OIDC, and adds
+      # the provenance attestation automatically.
       - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
