@@ -6,7 +6,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2026-06-04
 
 ### Added
 
@@ -42,6 +42,6 @@ Initial public release.
 This is the first release under the name **anyagent** (previously prototyped as
 `agent-bridge`). The bridge is intentionally filesystem-first and dependency-free.
 
-[Unreleased]: https://github.com/saucam/anyagent/compare/v0.1.0...HEAD
-[0.2.0]: https://github.com/saucam/anyagent/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/saucam/anyagent/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/saucam/anyagent/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/saucam/anyagent/releases/tag/v0.1.0
