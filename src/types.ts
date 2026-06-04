@@ -1,4 +1,4 @@
-export type TargetName = 'codex' | 'gemini' | 'hermes';
+export type TargetName = 'codex' | 'gemini' | 'cursor' | 'hermes';
 
 export type LinkMode = 'link' | 'copy';
 
@@ -7,6 +7,11 @@ export interface BridgeOptions {
   targets: TargetName[];
   mode: LinkMode;
   dryRun: boolean;
+  /**
+   * Check mode: never write, but record whether each operation *would* change
+   * disk. The CLI exits non-zero if anything is out of date. Implies no writes.
+   */
+  check: boolean;
 }
 
 export interface ClaudeSkill {
@@ -60,11 +65,20 @@ export interface ReportEntry {
   source: string;
   destination: string;
   warnings: string[];
+  /** Whether this operation changed (or would change, in check/dry-run) the target. */
+  changed: boolean;
 }
 
 export interface BridgeReport {
   entries: ReportEntry[];
-  add(target: TargetName, action: string, source: string, destination: string, warnings?: string[]): void;
+  add(
+    target: TargetName,
+    action: string,
+    source: string,
+    destination: string,
+    warnings?: string[],
+    changed?: boolean
+  ): void;
 }
 
 export interface TargetAdapter {

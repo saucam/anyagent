@@ -6,6 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - Unreleased
+
+### Added
+
+- **Cursor adapter** — skills and agents convert to `.cursor/rules/*.mdc`, and `CLAUDE.md` becomes an always-applied workspace rule. Lossy spots (no skill folder, no subagent concept) are reported, not dropped.
+- **`anyagent check`** (and `sync --check`) — writes nothing and exits non-zero when any bridged target drifts from the source. A CI gate for shared `.claude/` setups.
+- **Composite GitHub Action** (`saucam/anyagent@v1`) wrapping `anyagent check`.
+- **Release workflow** — publishes to npm (with provenance) when a GitHub Release is published.
+- `scripts/demo.sh`, `docs/launch.md`, and `docs/assets/SPEC.md`.
+
+### Changed
+
+- Generated guides are now written via `writeOutput`, so identical content is a no-op — quieter `watch`, meaningful `check`.
+- `doctor` output reworked into a scannable ✓/✗ summary with a "ready to bridge" line.
+- Default `--to` is now `codex gemini cursor hermes`.
+
 ## [0.1.0] - 2026-06-04
 
 Initial public release.
@@ -27,4 +43,5 @@ This is the first release under the name **anyagent** (previously prototyped as
 `agent-bridge`). The bridge is intentionally filesystem-first and dependency-free.
 
 [Unreleased]: https://github.com/saucam/anyagent/compare/v0.1.0...HEAD
+[0.2.0]: https://github.com/saucam/anyagent/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/saucam/anyagent/releases/tag/v0.1.0

@@ -5,10 +5,10 @@ import { discoverClaudeWorkspace } from '../src/discover.js';
 import { getAdapter } from '../src/adapters/index.js';
 import { createReport } from '../src/report.js';
 import type { BridgeOptions } from '../src/types.js';
-import { exists, lstat, makeWorkspace, read, readlink } from './helpers.js';
+import { exists, lstat, makeWorkspace, read, readlink, write } from './helpers.js';
 
 function options(root: string, overrides: Partial<BridgeOptions> = {}): BridgeOptions {
-  return { root, targets: ['codex'], mode: 'link', dryRun: false, ...overrides };
+  return { root, targets: ['codex'], mode: 'link', dryRun: false, check: false, ...overrides };
 }
 
 test('codex sync links a skill, converts the agent, and writes AGENTS.md', async () => {
@@ -48,10 +48,18 @@ test('generated files never leak an absolute home path', async () => {
   const ws = await makeWorkspace();
   try {
     const source = await discoverClaudeWorkspace(ws.root);
-    for (const target of ['codex', 'gemini', 'hermes'] as const) {
+    for (const target of ['codex', 'gemini', 'cursor', 'hermes'] as const) {
       await getAdapter(target).sync(source, options(ws.root, { targets: [target] }), createReport());
     }
-    const generated = ['AGENTS.md', 'GEMINI.md', '.hermes/WORKSPACE.md', '.codex/agents/reviewer.toml'];
+    const generated = [
+      'AGENTS.md',
+      'GEMINI.md',
+      '.hermes/WORKSPACE.md',
+      '.codex/agents/reviewer.toml',
+      '.cursor/rules/workspace.mdc',
+      '.cursor/rules/agent-reviewer.mdc',
+      '.cursor/rules/skill-reviewer.mdc'
+    ];
     for (const file of generated) {
       const content = await read(ws.root, file);
       assert.ok(!content.includes(ws.root), `${file} leaked the absolute workspace path`);
@@ -109,11 +117,85 @@ test('every adapter plan and sync agree on the same targets', async () => {
   const ws = await makeWorkspace();
   try {
     const source = await discoverClaudeWorkspace(ws.root);
-    for (const target of ['codex', 'gemini', 'hermes'] as const) {
+    for (const target of ['codex', 'gemini', 'cursor', 'hermes'] as const) {
       const adapter = getAdapter(target);
       const ops = await adapter.plan(source, options(ws.root, { targets: [target] }));
       assert.ok(ops.length >= 3, `${target} should plan at least skill + agent + guide`);
     }
+  } finally {
+    await ws.cleanup();
+  }
+});
+
+test('cursor sync writes valid .mdc rules with frontmatter and no symlinks', async () => {
+  const ws = await makeWorkspace();
+  try {
+    const source = await discoverClaudeWorkspace(ws.root);
+    await getAdapter('cursor').sync(source, options(ws.root, { targets: ['cursor'] }), createReport());
+
+    const workspace = await read(ws.root, '.cursor/rules/workspace.mdc');
+    assert.match(workspace, /^---\n/);
+    assert.match(workspace, /alwaysApply: true/);
+
+    const skillRule = await read(ws.root, '.cursor/rules/skill-reviewer.mdc');
+    // description should be lifted from the SKILL.md frontmatter
+    assert.match(skillRule, /description: "Code review skill\."/);
+    assert.match(skillRule, /alwaysApply: false/);
+
+    const agentRule = await read(ws.root, '.cursor/rules/agent-reviewer.mdc');
+    assert.match(agentRule, /Reviewer Agent/);
+
+    // Cursor has no skill folder — nothing should be symlinked.
+    assert.equal(await exists(ws.root, '.cursor/skills'), false);
+  } finally {
+    await ws.cleanup();
+  }
+});
+
+test('cursor conversions are reported as lossy (warnings present)', async () => {
+  const ws = await makeWorkspace();
+  try {
+    const source = await discoverClaudeWorkspace(ws.root);
+    const report = createReport();
+    await getAdapter('cursor').sync(source, options(ws.root, { targets: ['cursor'] }), report);
+    const warned = report.entries.filter((e) => e.warnings.length > 0);
+    assert.ok(warned.length >= 2, 'skill and agent conversions should both warn about lossiness');
+  } finally {
+    await ws.cleanup();
+  }
+});
+
+test('check mode: clean after sync, dirty after the source changes, writes nothing', async () => {
+  const ws = await makeWorkspace();
+  try {
+    let source = await discoverClaudeWorkspace(ws.root);
+    const targets = ['codex', 'gemini', 'cursor', 'hermes'] as const;
+
+    // First, bring everything in sync.
+    for (const target of targets) {
+      await getAdapter(target).sync(source, options(ws.root, { targets: [target] }), createReport());
+    }
+
+    // A check run now should report zero drift.
+    const clean = createReport();
+    for (const target of targets) {
+      await getAdapter(target).sync(source, options(ws.root, { targets: [target], check: true }), clean);
+    }
+    assert.equal(clean.entries.some((e) => e.changed), false, 'expected no drift right after sync');
+
+    // Mutate the source guide, then re-discover.
+    await write(ws.root, 'CLAUDE.md', '# Workspace Map\n\n- A brand new rule.\n');
+    source = await discoverClaudeWorkspace(ws.root);
+
+    const dirty = createReport();
+    for (const target of targets) {
+      await getAdapter(target).sync(source, options(ws.root, { targets: [target], check: true }), dirty);
+    }
+    assert.ok(dirty.entries.some((e) => e.changed), 'expected drift after the source changed');
+
+    // Check mode must not have written the update.
+    const onDisk = await read(ws.root, 'AGENTS.md');
+    assert.ok(!onDisk.includes('A brand new rule.'), 'check mode must not write');
   } finally {
     await ws.cleanup();
   }

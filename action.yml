@@ -1,0 +1,26 @@
+name: anyagent check
+description: Fail CI when bridged agent configs (Codex / Gemini / Cursor / Hermes) drift from the canonical .claude/ source.
+branding:
+  icon: refresh-cw
+  color: blue
+
+inputs:
+  root:
+    description: Workspace root to check.
+    required: false
+    default: "."
+  to:
+    description: Space-separated targets to verify (e.g. "codex gemini cursor").
+    required: false
+    default: "codex gemini cursor hermes"
+  version:
+    description: anyagent version/dist-tag to run via npx.
+    required: false
+    default: "latest"
+
+runs:
+  using: composite
+  steps:
+    - name: anyagent check
+      shell: bash
+      run: npx -y anyagent@${{ inputs.version }} check --root "${{ inputs.root }}" --to ${{ inputs.to }}

@@ -32,6 +32,26 @@ export async function writeFile(filePath: string, content: string, dryRun = fals
   await fs.writeFile(filePath, content, 'utf8');
 }
 
+/**
+ * Writes a generated file only when its content would change, and reports
+ * whether it `changed` or was already `unchanged`. In `dryRun`/`check` mode it
+ * never writes — it just compares. This is what makes generated guides
+ * idempotent (quiet `watch`, meaningful `--check`).
+ */
+export async function writeOutput(
+  filePath: string,
+  content: string,
+  opts: { dryRun?: boolean; check?: boolean } = {}
+): Promise<'changed' | 'unchanged'> {
+  const current = await readText(filePath).catch(() => null);
+  const changed = current !== content;
+  if (changed && !opts.dryRun && !opts.check) {
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, content, 'utf8');
+  }
+  return changed ? 'changed' : 'unchanged';
+}
+
 export async function listDirs(dirPath: string): Promise<string[]> {
   if (!(await exists(dirPath))) return [];
   const entries = await fs.readdir(dirPath, { withFileTypes: true });

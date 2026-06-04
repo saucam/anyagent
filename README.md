@@ -14,17 +14,21 @@
 
 </div>
 
+<!-- MEDIA:demo — when docs/assets/demo.gif lands (see docs/assets/SPEC.md), replace this comment with:
+<div align="center"><img src="docs/assets/demo.gif" alt="anyagent demo: one Claude Code setup synced into Codex, Gemini, and Cursor" width="760"></div>
+-->
+
 ---
 
-You spent weeks building your **Claude Code** setup — skills, subagents, project rules, workspace guidance. Then you open **Codex**, or **Gemini**, and every one of them starts the session half-amnesiac. So you copy-paste folders, rewrite agents in a different format, and watch them drift out of sync forever.
+You spent weeks building your **Claude Code** setup — skills, subagents, project rules, workspace guidance. Then you open **Codex**, **Gemini**, or **Cursor**, and every one of them starts the session half-amnesiac. So you copy-paste folders, rewrite agents in a different format, and watch them drift out of sync forever.
 
 **anyagent** keeps your Claude Code `.claude/` workspace as the single source of truth and projects it into the native formats other agents already know how to read. One canonical setup. Every assistant. No duplicated folders, no copy-paste drift.
 
 ```bash
-npx anyagent sync --to codex gemini
+npx anyagent sync --to codex gemini cursor
 ```
 
-That's it. Your Claude skills now show up in Codex's `.agents/skills/`, your agents become Codex TOML and Gemini Markdown, and your `CLAUDE.md` becomes `AGENTS.md` and `GEMINI.md` — all generated from the one workspace you already maintain.
+That's it. Your Claude skills now show up in Codex's `.agents/skills/`, your agents become Codex TOML / Gemini Markdown / Cursor `.mdc` rules, and your `CLAUDE.md` becomes `AGENTS.md`, `GEMINI.md`, and a Cursor workspace rule — all generated from the one workspace you already maintain.
 
 ## 30-second demo
 
@@ -36,13 +40,13 @@ npx anyagent init
 npx anyagent doctor
 
 # 3. Preview every change without touching disk
-npx anyagent plan --to codex gemini hermes
+npx anyagent plan --to codex gemini cursor
 
 # 4. Bridge it
-npx anyagent sync --to codex gemini hermes
+npx anyagent sync --to codex gemini cursor
 ```
 
-Now the *same* Claude-origin skill and reviewer agent are discoverable in Codex and Gemini — no rewrite, no second copy to keep in sync.
+Now the *same* Claude-origin skill and reviewer agent are discoverable in Codex, Gemini, and Cursor — no rewrite, no second copy to keep in sync.
 
 ## Why this exists
 
@@ -53,35 +57,40 @@ AI coding tools are converging on the same **primitives** — skills, agents, ru
 | Claude Code | `.claude/skills/*/SKILL.md` | `.claude/agents/*.md` | `CLAUDE.md` |
 | Codex | `.agents/skills/*` | `.codex/agents/*.toml` | `AGENTS.md` |
 | Gemini | `.gemini/skills/*` | `.gemini/agents/*.md` | `GEMINI.md` |
+| Cursor | — (rules) | — (rules) | `.cursor/rules/*.mdc` |
 
 The next layer of value isn't another agent. It's the **compatibility layer between agents** — so your accumulated workflow knowledge belongs to *you*, not to whichever tool you opened today.
 
+> **Already using `AGENTS.md`?** anyagent *generates* it for you — from the `CLAUDE.md` and `.claude/` setup you already maintain — and keeps it in sync, so the standard layout and your canonical source never drift apart.
+
 ## How it works
 
+<!-- MEDIA:architecture — when docs/assets/architecture.svg lands (see docs/assets/SPEC.md),
+replace the ASCII block below with: <div align="center"><img src="docs/assets/architecture.svg" alt="anyagent architecture: one .claude/ source fanning out to Codex, Gemini, Cursor, and Hermes" width="900"></div> -->
+
 ```
-          ┌──────────────────────────┐
-          │   Canonical source       │
-          │   .claude/               │
-          │     skills/              │
-          │     agents/              │
-          │     settings.json        │
-          │   CLAUDE.md              │
-          └────────────┬─────────────┘
-                       │  anyagent sync
-        ┌──────────────┼──────────────┐
-        ▼              ▼               ▼
-   ┌─────────┐    ┌─────────┐    ┌─────────┐
-   │  Codex  │    │ Gemini  │    │ Hermes  │
-   │ .agents │    │ .gemini │    │ .hermes │
-   │ .codex  │    │ GEMINI  │    │WORKSPACE│
-   │ AGENTS  │    │  .md    │    │  .md    │
-   └─────────┘    └─────────┘    └─────────┘
+            ┌──────────────────────────┐
+            │   Canonical source       │
+            │   .claude/ ( skills/     │
+            │             agents/      │
+            │             settings )   │
+            │   CLAUDE.md              │
+            └────────────┬─────────────┘
+                         │  anyagent sync
+        ┌────────────┬───┴───┬────────────┐
+        ▼            ▼       ▼             ▼
+   ┌─────────┐ ┌─────────┐ ┌────────┐ ┌─────────┐
+   │  Codex  │ │ Gemini  │ │ Cursor │ │ Hermes  │
+   │ .agents │ │ .gemini │ │ .cursor│ │ .hermes │
+   │ .codex  │ │ GEMINI  │ │ /rules │ │WORKSPACE│
+   │ AGENTS  │ │  .md    │ │ *.mdc  │ │  .md    │
+   └─────────┘ └─────────┘ └────────┘ └─────────┘
 ```
 
-- **Skills are symlinked** (relative links, so your workspace stays portable) into each target's native skill folder. Edit once, every agent sees the change instantly.
-- **Agents are converted** into each target's manifest — Codex TOML, Gemini/Hermes Markdown — preserving the original instructions.
-- **Workspace guidance is generated**: `CLAUDE.md` → `AGENTS.md` / `GEMINI.md` / `.hermes/WORKSPACE.md`.
-- **Lossy conversions are reported, never silent.** When a Claude-specific concept (hooks, tool policies) has no native equivalent, anyagent preserves it as readable instructions and prints a `warn:` line. Trust comes from honesty.
+- **Skills are symlinked** (relative links, so your workspace stays portable) into each target's native skill folder. Edit once, every agent sees the change instantly. (Cursor has no skill folder, so skills become `.mdc` rules.)
+- **Agents are converted** into each target's manifest — Codex TOML, Gemini/Hermes Markdown, Cursor `.mdc` — preserving the original instructions.
+- **Workspace guidance is generated**: `CLAUDE.md` → `AGENTS.md` / `GEMINI.md` / `.cursor/rules/workspace.mdc` / `.hermes/WORKSPACE.md`.
+- **Lossy conversions are reported, never silent.** When a Claude-specific concept (hooks, tool policies, or Cursor's lack of subagents) has no native equivalent, anyagent preserves it as readable instructions and prints a `warn:` line. Trust comes from honesty.
 
 ```
 $ anyagent sync --to codex
@@ -124,6 +133,7 @@ Requires **Node.js ≥ 20**. Zero runtime dependencies.
 | `anyagent doctor` | Report every skill, agent, setting, and guide anyagent can see. |
 | `anyagent plan` | Print the exact operations `sync` would perform — no writes. |
 | `anyagent sync` | Bridge skills, agents, and guidance into each target. |
+| `anyagent check` | Exit non-zero if any target is out of date. Writes nothing — for CI. |
 | `anyagent watch` | Re-run `sync` on an interval so targets track the source. |
 
 ### Flags
@@ -131,10 +141,36 @@ Requires **Node.js ≥ 20**. Zero runtime dependencies.
 | Flag | Default | Meaning |
 | ---- | ------- | ------- |
 | `--root <path>` | `.` | The workspace root to read from. |
-| `--to <targets...>` | `codex gemini hermes` | Which targets to bridge into. |
+| `--to <targets...>` | `codex gemini cursor hermes` | Which targets to bridge into. |
 | `--copy` | off (symlink) | Copy skills instead of symlinking — for environments where symlinks aren't ideal. |
 | `--dry-run` | off | Plan the work without writing anything. |
+| `--check` | off | Like `sync` but writes nothing and exits non-zero on drift (alias: `anyagent check`). |
 | `--interval-ms <n>` | `2000` | `watch` poll interval (min 250). |
+
+## Keep it in sync in CI
+
+Shared a `.claude/` setup with your team? Make drift impossible to merge. `anyagent check` exits non-zero the moment a bridged target falls behind the source:
+
+```yaml
+# .github/workflows/agents.yml
+name: agents
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: saucam/anyagent@v1
+        with:
+          to: codex gemini cursor
+```
+
+```
+✗ out of date — 1 artifact(s) would change:
+  [cursor] generated guide: .cursor/rules/workspace.mdc
+
+Run `anyagent sync` to update them.
+```
 
 ## Design principles
 
@@ -149,10 +185,10 @@ Requires **Node.js ≥ 20**. Zero runtime dependencies.
 
 | Target | Status | Notes |
 | ------ | ------ | ----- |
-| Codex | ✅ | Skills, agents (TOML), `AGENTS.md` |
-| Gemini | ✅ | Skills, agents (Markdown), `GEMINI.md` |
-| Hermes | ✅ | Skills, agents (Markdown), `.hermes/WORKSPACE.md` |
-| Cursor | 🔭 roadmap | `.cursor/rules/*` |
+| Codex | ✅ | Skills (symlink), agents (TOML), `AGENTS.md` |
+| Gemini | ✅ | Skills (symlink), agents (Markdown), `GEMINI.md` |
+| Cursor | ✅ | Skills + agents → `.cursor/rules/*.mdc`, workspace rule from `CLAUDE.md` |
+| Hermes | ✅ | Skills (symlink), agents (Markdown), `.hermes/WORKSPACE.md` |
 | Windsurf | 🔭 roadmap | — |
 | Aider / OpenCode | 🔭 roadmap | — |
 
@@ -160,14 +196,13 @@ Want a target? [Open an issue](https://github.com/saucam/anyagent/issues/new/cho
 
 ## Roadmap
 
-- Cursor and Windsurf adapters
+- Windsurf, Aider, and OpenCode adapters
 - MCP config normalization across tools
 - A hook-compatibility matrix
 - Cross-agent command conversion
 - `anyagent publish` — export a portable, shareable bundle
-- GitHub Action to validate shared agent setups in a repo
 
-See [proposal.md](proposal.md) for the full vision.
+Launching it? There's ready-to-use copy in [docs/launch.md](docs/launch.md). The full vision lives in [proposal.md](proposal.md).
 
 ## Contributing
 

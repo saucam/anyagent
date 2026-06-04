@@ -2,7 +2,7 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import { discoverClaudeWorkspace } from './discover.js';
 import { getAdapter, listAdapters } from './adapters/index.js';
-import { createReport, printReport } from './report.js';
+import { createReport, printCheck, printReport } from './report.js';
 import { rel } from './fs-utils.js';
 import { initWorkspace } from './init.js';
 import type { BridgeOptions, LinkMode, TargetName } from './types.js';
@@ -13,6 +13,7 @@ interface ParsedArgs {
   targets: TargetName[];
   mode: LinkMode;
   dryRun: boolean;
+  check: boolean;
   intervalMs: number;
 }
 
@@ -24,20 +25,28 @@ function usage(): string {
 Usage:
   anyagent init   [--root <path>] [--dry-run]
   anyagent doctor [--root <path>]
-  anyagent plan   [--root <path>] [--to codex gemini hermes] [--copy]
-  anyagent sync   [--root <path>] [--to codex gemini hermes] [--copy] [--dry-run]
-  anyagent watch  [--root <path>] [--to codex gemini hermes] [--interval-ms 2000]
+  anyagent plan   [--root <path>] [--to codex gemini cursor hermes] [--copy]
+  anyagent sync   [--root <path>] [--to codex gemini cursor hermes] [--copy] [--dry-run]
+  anyagent check  [--root <path>] [--to codex gemini cursor hermes]
+  anyagent watch  [--root <path>] [--to codex gemini cursor hermes] [--interval-ms 2000]
 
 Commands:
   init    Scaffold a starter canonical .claude/ workspace (never overwrites).
   doctor  Report what anyagent can see in the canonical workspace.
   plan    Print the operations sync would perform, without touching disk.
   sync    Bridge skills, agents, and guidance into each target layout.
+  check   Exit non-zero if any target is out of date (CI gate). Writes nothing.
   watch   Re-run sync on an interval so targets track the source.
+
+Targets:
+  codex   .agents/skills, .codex/agents/*.toml, AGENTS.md
+  gemini  .gemini/skills, .gemini/agents/*.md, GEMINI.md
+  cursor  .cursor/rules/*.mdc
+  hermes  .hermes/skills, .hermes/agents/*.md, .hermes/WORKSPACE.md
 
 Defaults:
   --root .
-  --to codex gemini hermes
+  --to codex gemini cursor hermes
   mode is symlink unless --copy is passed
 `;
 }
@@ -49,6 +58,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   let targets: TargetName[] = listAdapters();
   let mode: LinkMode = 'link';
   let dryRun = false;
+  let check = false;
   let intervalMs = 2000;
 
   for (let index = 0; index < args.length; index += 1) {
@@ -75,6 +85,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       dryRun = true;
       continue;
     }
+    if (arg === '--check') {
+      check = true;
+      continue;
+    }
     if (arg === '--interval-ms') {
       intervalMs = Number(args[++index] ?? intervalMs);
       if (!Number.isFinite(intervalMs) || intervalMs < 250) throw new Error('--interval-ms must be at least 250');
@@ -83,7 +97,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     throw new Error(`Unknown argument: ${arg}`);
   }
 
-  return { command, root, targets, mode, dryRun, intervalMs };
+  return { command, root, targets, mode, dryRun, check, intervalMs };
 }
 
 function optionsFromArgs(args: ParsedArgs): BridgeOptions {
@@ -91,7 +105,8 @@ function optionsFromArgs(args: ParsedArgs): BridgeOptions {
     root: args.root,
     targets: args.targets,
     mode: args.mode,
-    dryRun: args.dryRun
+    dryRun: args.dryRun,
+    check: args.check
   };
 }
 
@@ -102,22 +117,28 @@ async function printInit(args: ParsedArgs): Promise<void> {
   if (result.created.length === 0) {
     console.log('\nWorkspace already initialized. Run `anyagent sync` to bridge it.');
   } else {
-    console.log('\nNext: `anyagent sync --to codex gemini hermes`');
+    console.log('\nNext: `anyagent sync --to codex gemini cursor`');
   }
 }
 
 async function printDoctor(args: ParsedArgs): Promise<void> {
   const source = await discoverClaudeWorkspace(args.root);
   const show = (file: string): string => rel(source.root, file);
-  console.log(`Root: ${source.root}`);
-  console.log(`Claude directory: ${source.hasClaudeDir ? 'found' : 'missing'}`);
-  console.log(`Workspace CLAUDE.md: ${source.workspaceGuide ? show(source.workspaceGuide.file) : 'missing'}`);
-  console.log(`Skills: ${source.skills.length}`);
-  for (const skill of source.skills) console.log(`  - ${skill.name}: ${show(skill.skillFile)}`);
-  console.log(`Agents: ${source.agents.length}`);
-  for (const agent of source.agents) console.log(`  - ${agent.name}: ${show(agent.file)}`);
-  console.log(`Settings files: ${source.settings.length}`);
-  for (const setting of source.settings) console.log(`  - ${setting.name}: ${show(setting.file)}`);
+  const check = (ok: boolean): string => (ok ? '✓' : '✗');
+
+  console.log(`anyagent doctor — ${source.root}\n`);
+  console.log(`${check(source.hasClaudeDir)} .claude directory`);
+  console.log(`${check(Boolean(source.workspaceGuide))} CLAUDE.md            ${source.workspaceGuide ? show(source.workspaceGuide.file) : '(missing)'}`);
+  console.log(`${check(source.skills.length > 0)} ${String(source.skills.length).padStart(2)} skill(s)`);
+  for (const skill of source.skills) console.log(`     • ${skill.name}  ←  ${show(skill.skillFile)}`);
+  console.log(`${check(source.agents.length > 0)} ${String(source.agents.length).padStart(2)} agent(s)`);
+  for (const agent of source.agents) console.log(`     • ${agent.name}  ←  ${show(agent.file)}`);
+  console.log(`${check(true)} ${String(source.settings.length).padStart(2)} settings file(s)`);
+  for (const setting of source.settings) console.log(`     • ${setting.name}  ←  ${show(setting.file)}`);
+
+  const portable = source.skills.length + source.agents.length + (source.workspaceGuide ? 1 : 0);
+  console.log(`\n${portable} portable artifact(s) ready to bridge into: ${listAdapters().join(', ')}`);
+  console.log(`Next: anyagent sync --to ${listAdapters().join(' ')}`);
 }
 
 async function printPlan(args: ParsedArgs): Promise<void> {
@@ -136,6 +157,7 @@ async function printPlan(args: ParsedArgs): Promise<void> {
 }
 
 async function sync(args: ParsedArgs): Promise<void> {
+  if (args.check) return check(args);
   const source = await discoverClaudeWorkspace(args.root);
   const options = optionsFromArgs(args);
   const report = createReport();
@@ -145,10 +167,21 @@ async function sync(args: ParsedArgs): Promise<void> {
   printReport(report, source.root);
 }
 
+async function check(args: ParsedArgs): Promise<void> {
+  const source = await discoverClaudeWorkspace(args.root);
+  const options: BridgeOptions = { ...optionsFromArgs(args), check: true };
+  const report = createReport();
+  for (const target of args.targets) {
+    await getAdapter(target).sync(source, options, report);
+  }
+  const inSync = printCheck(report, source.root);
+  if (!inSync) process.exitCode = 1;
+}
+
 async function watch(args: ParsedArgs): Promise<void> {
   console.log(`Watching ${args.root}; syncing every ${args.intervalMs}ms. Press Ctrl+C to stop.`);
   while (true) {
-    await sync(args);
+    await sync({ ...args, check: false });
     await sleep(args.intervalMs);
   }
 }
@@ -163,6 +196,7 @@ async function main(): Promise<void> {
   if (args.command === 'doctor') return printDoctor(args);
   if (args.command === 'plan') return printPlan(args);
   if (args.command === 'sync') return sync(args);
+  if (args.command === 'check') return check(args);
   if (args.command === 'watch') return watch(args);
   throw new Error(`Unknown command: ${args.command}\n\n${usage()}`);
 }

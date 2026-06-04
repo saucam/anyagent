@@ -1,7 +1,7 @@
 {
   "name": "anyagent",
-  "version": "0.1.0",
-  "description": "Write your agent setup once, run it in any agent. Bridge Claude Code skills, agents, and workspace guidance into Codex, Gemini, and local Hermes layouts.",
+  "version": "0.2.0",
+  "description": "Write your agent setup once, run it in any agent. Bridge Claude Code skills, agents, and workspace guidance into Codex, Gemini, Cursor, and local Hermes layouts.",
   "type": "module",
   "bin": {
     "anyagent": "./dist/cli.js"
@@ -22,13 +22,15 @@
     "dev": "tsx src/cli.ts",
     "start": "node dist/cli.js",
     "doctor": "tsx src/cli.ts doctor",
-    "demo": "tsx src/cli.ts sync --root examples/claude-source --to codex gemini hermes --dry-run",
+    "demo": "tsx src/cli.ts sync --root examples/claude-source --to codex gemini cursor hermes --dry-run",
     "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "keywords": [
     "claude-code",
     "codex",
     "gemini",
+    "cursor",
+    "cursor-rules",
     "hermes",
     "skills",
     "agents",

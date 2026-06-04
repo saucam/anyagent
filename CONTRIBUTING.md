@@ -47,20 +47,21 @@ export interface TargetAdapter {
 }
 ```
 
-To add, say, a `cursor` adapter:
+To add, say, a `windsurf` adapter (`cursor` is already built — read [`src/adapters/cursor.ts`](src/adapters/cursor.ts) as the reference for a generate-only target):
 
-1. Add `'cursor'` to `TargetName` in `src/types.ts`.
-2. Create `src/adapters/cursor.ts` exporting a `cursorAdapter: TargetAdapter`. Use `linkOrCopyDir` for skills and `writeFile` for generated guidance — both already produce **relative** paths.
+1. Add `'windsurf'` to `TargetName` in `src/types.ts`.
+2. Create `src/adapters/windsurf.ts` exporting a `windsurfAdapter: TargetAdapter`. Use `linkOrCopyDir` for skills (if the target has a skill folder) and `writeOutput` for generated guidance — both produce **relative** paths, and `writeOutput` makes the target check-aware for free.
 3. Register it in `src/adapters/index.ts`.
-4. If agents need a Cursor-specific shape, add `convertClaudeAgentToCursor` in `src/converters/claude-agent.ts`.
-5. Add a spec in `test/sync.test.ts` (copy an existing target's cases).
+4. If agents need a target-specific shape, add `convertClaudeAgentToWindsurf` in `src/converters/claude-agent.ts`.
+5. Add a spec in `test/sync.test.ts`, and extend the cross-target loops (the "no absolute path leaks" and "check mode" tests) to include your target.
 
 ### Non-negotiables for adapters
 
-- **Generated files and symlinks must be relative.** Never write an absolute path into a generated artifact — it breaks the portability that's the whole point. The `generated files never leak an absolute home path` test enforces this.
-- **`sync` must be idempotent.** Running it twice should report skips, not churn. The `sync is idempotent` test enforces this.
+- **Generated files and symlinks must be relative.** Never write an absolute path into a generated artifact — it breaks the portability that's the whole point. The `generated files never leak an absolute home path` test enforces this across every target.
+- **`sync` must be idempotent.** Running it twice should report skips, not churn. Use `writeOutput` (not `writeFile`) for generated files so identical content is a no-op. The `sync is idempotent` and `check mode` tests enforce this.
+- **Report drift honestly.** Pass the real `changed` flag to `report.add(...)` (`result === 'changed'` / `result === 'applied'`) so `anyagent check` can gate CI.
 - **Lossy conversions emit a warning, never a silent drop.** Add a `warnings: [...]` entry to the `ConvertedAgent` instead of dropping the field.
-- **`--dry-run` must write nothing.** Thread `options.dryRun` through every write.
+- **`--dry-run` and `--check` must write nothing.** `writeOutput` and `linkOrCopyDir` already honor both — thread `options` through, don't reach past them.
 
 ## Tests
 
